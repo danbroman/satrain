@@ -1,1 +1,2 @@
 # satrain
+These set of files download and subset satellite rainfall products. The 'get' files are designed to be used in conjunction with a cronjob to automatically download the most current file and update a local archive of data in the original file format. The 'subset' files convert the original format to a standard 'int16' binary file format and ensure consistancy with dimensions; latitude being negative to positive and longitude starting from 0 and going counterclockwise. These files also subset the original file to longitude / latitude bounds specified. 
