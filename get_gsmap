@@ -1,0 +1,35 @@
+###DOWNLOAD HOURLY JAXA EORC GSMAP-RT PRODUCT
+##############################
+##IMPORT MODULES
+import datetime as dt #for getting current date/time
+import pytz #for setting time zone
+import urllib #for downloading file from url
+import numpy as np #for array storage and manipulation
+import gzip #for reading gzip files
+import os #for access to system commands
+##############################
+##USER INPUTS
+rdhead = 'ftp://rainmap:Niskur+1404@hokusai.eorc.jaxa.jp/realtime/archive/' 
+rdid = 'gsmap_nrt.' #product id in url
+rdext = '.dat.gz' #file extension in url
+savhead = '/d2/dbroman/gsmap-nrt/raw/' #dir to save raw file
+savid = prodid #product id in raw file ..set to same as id in url
+savext = rdext #file extension in raw file ..set to same as id in url
+dattyp = np.dtype('<f4') #32-bit floating point little endian
+hlag = 5 #hour lag on file access
+##############################
+##BUILD URL AND RAW FILE PATH
+d = dt.datetime.now(tz = pytz.utc) - dt.timedelta(hours = hlag) #date object of current time minus lag (timezone set to utc)
+year = str(d.year) #extracts year from date 
+month = str('%02d' % (int(d.month))) #extracts month from date with leading zero
+day = str('%02d' % (int(d.day))) #extracts day from date with leading zero
+hour = str('%04d' % (int(d.hour) * 100)) #extracts hour and formats to XX00 with leading zeros
+url = rdhead + year + '/' + month + '/' + day + '/' + rdid + year + month + day + hour + rdext #url to download
+rawsav = savhead + savid + year + month + day + '.' + hour + rdext #raw file to save
+##############################
+##DOWNLOAD FILE
+if os.path.isfile(rawsav) is False: #checks if raw file exists
+    try:
+        urllib.urlretrieve(url, rawsav) #downloads file from url and saves to specified directory
+    except (RuntimeError, TypeError, NameError, IOError):
+        pass
