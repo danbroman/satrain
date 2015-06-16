@@ -1,0 +1,40 @@
+###SUBSET HOURLY JAXA EORC GSMAP-RT PRODUCT
+##############################
+##IMPORT MODULES
+import datetime as dt #for getting current date/time
+import pytz #for setting time zone
+import urllib #for downloading file from url
+import numpy as np #for array storage and manipulation
+import gzip #for reading gzip files
+import os #for access to system commands
+##############################
+##USER INPUTS
+rdext = '.dat.gz' #raw file extension
+savdir = '/d2/dbroman/gsmap-nrt/india/' #dir to save subset file
+savid = 'gsmap_nrt_indiasub.'
+savext = '.bin'
+dattyp = 'int16' #data type to save subset file
+lonlen = 3600 #number of lon gridboxes
+latlen = 1200 #number of lat gridboxes
+lonvec = np.arange(0.05, 360, 0.1) #array of lon values 0 to 360 by 0.1
+latvec = np.arange(-59.95, 60, 0.1) #array of lat values -60 to 60 by 0.1
+lonbounds = [73 , 98] #lon subset bounds
+latbounds = [22 , 32] #lat subset bounds
+##############################
+##FIND SUBSET INDICES AND BUILD SUBSET FILE PATH
+lonli = np.argmin(np.abs(lonvec - lonbounds[0]))
+lonui = np.argmin(np.abs(lonvec - lonbounds[1]))
+latli = np.argmin(np.abs(latvec - latbounds[0]))
+latui = np.argmin(np.abs(latvec - latbounds[1]))
+subsav = savdir +  + year + month + day + '.' + hour + savext
+##############################
+##SUBSETS FILE
+if os.path.isfile(binsubsav) is False:
+    try:
+        varin = gzip.open(binsav) #opens gzip file to memory
+        var = np.frombuffer(varin.read(), dtype = dattyp).reshape(latlen, lonlen).swapaxes(0,1) #reads file from memory into numpy array, reshapes to lon/lat dimensions, swaps axes to change from (lat, lon) to a (lon, lat) 
+        var = np.fliplr(var) #flips along lat dimension. lat indexed in raw file 60 to -60, want to match conventional index -60 to 60 
+        varsub = var[lonli:lonui, latli:latui] #subset file using indices found above
+        varsub.astype(dattyp).tofile(subsav) #save file as binary
+    except (RuntimeError, TypeError, NameError, IOError):
+        pass
