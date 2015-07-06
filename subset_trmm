@@ -1,0 +1,33 @@
+###SUBSET NASA TRMM 3B42RT PRODUCT
+##############################
+##IMPORT MODULES
+import datetime as dt #for getting current date/time
+import pytz #for setting time zone
+import urllib #for downloading file from url
+import numpy as np #for array storage and manipulation
+import gzip #for reading gzip files
+import os #for access to system commands
+##############################
+##USER INPUTS
+rdext = '.BIN.gz' #raw file extension
+savdir = '/d2/dbroman/gsmap-nrt/india/' #dir to save subset file
+savid = 'gsmap_nrt_indiasub.'
+savext = '.bin'
+dattyp = 'int16' #data type to save subset file
+lonlen = 1440 #number of lon gridboxes
+latlen = 480 #number of lat gridboxes
+strt_offset = 2880
+end_offset = strt_offset + 2 * latlen * lonlen
+scale_factor = 100
+flagval = -31999        
+lonvec = np.arange(0.125, 360, 0.25) #array of lon values 0 to 360 by 0.25
+latvec = np.arange(-59.875, 60, 0.25) #array of lat values -60 to 60 by 0.25
+lonbounds = [73 , 98] #lon subset bounds
+latbounds = [22 , 32] #lat subset bounds
+##############################
+##FIND SUBSET INDICES AND BUILD SUBSET FILE PATH
+lonli = np.argmin(np.abs(lonvec - lonbounds[0]))
+lonui = np.argmin(np.abs(lonvec - lonbounds[1]))
+latli = np.argmin(np.abs(latvec - latbounds[0]))
+latui = np.argmin(np.abs(latvec - latbounds[1]))
+subsav = savdir +  + year + month + day + '.' + hour + savext
