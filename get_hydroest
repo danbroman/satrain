@@ -1,0 +1,63 @@
+###DOWNLOAD HOURLY UPDATES AND PROCESS
+###FOR NOAA STAR HYDROESTIMATOR PRODUCT
+##############################
+##IMPORT MODULES
+import datetime as dt
+import pytz
+import urllib
+import numpy as np
+import numpy.ma as ma
+import gzip
+import os
+##############################
+##SET DIRECTORY PATH AND DATA LATENCY
+rdhead = 'ftp://ftp.star.nesdis.noaa.gov/pub/smcd/emb/f_f/hydroest/world/world/'
+rdext = '.gz'
+savdirraw = '/d2/dbroman/hydroestimator/raw/'
+savdirproc = '/d2/dbroman/hydroestimator/india/'
+#dattyp is ASCII
+lonlen = 8001 #from documentation
+latlen = 3111 #from documentation
+lonvec = np.loadtxt('/d2/dbroman/hydroestimator/dims/hydroest_lons.txt')
+latvec = np.loadtxt('/d2/dbroman/hydroestimator/dims/hydroest_lats.txt')
+hlag = 2 #hour lag 
+##############################
+##SUBSET VALS
+latbounds = [22 , 32] #india bounds
+lonbounds = [73 , 98] #india bounds
+latli = np.argmin(np.abs(latvec - latbounds[1])) #bounds switched because of ordering
+latui = np.argmin(np.abs(latvec - latbounds[0])) #bounds switched because of ordering
+lonli = np.argmin(np.abs(lonvec - lonbounds[1])) #bounds switched because of ordering
+lonui = np.argmin(np.abs(lonvec - lonbounds[0])) #bounds switched because of ordering
+##############################
+utc = pytz.utc
+d = dt.datetime.now(tz = utc) - dt.timedelta(hours = hlag)
+year = str(d.year)
+month = str('%02d' % (int(d.month)))
+day = str('%02d' % (int(d.day)))
+doy = str('%02d' % int(d.strftime('%j')))
+hour = str('%02d' % (int(d.hour)))
+hoursav = str('%04d' % (int(hour) * 100))
+
+url = rdhead + 'world1hr.'+ year + doy + hour + rdext
+binsav = savdirraw + 'world1hr.' + year + doy + hour + rdext
+binsubsav = savdirproc + 'hydroest_indiasub.' + year + month + day + '.' + hoursav + '.bi$
+if os.path.isfile(binsubsav) is False:
+        if os.path.isfile(binsav) is False:
+            try:
+                urllib.urlretrieve(url, binsav)
+            except (RuntimeError, TypeError, NameError, IOError):
+                print 'unable to download'
+        try:
+                varin = gzip.open(binsav).readlines()
+                vartem = [int(varl.strip()) for varl in varin[1:]]
+                var = np.array(vartem).reshape(latlen, lonlen).swapaxes(1,0)
+                var = (var - 2) * 0.30
+                #SUBSET TO INDIA
+                varsub = var[lonli:lonui, latli:latui]
+
+                #SAVE SUBSET FILE
+                varsub.astype('int16').tofile(binsubsav)
+
+        except (RuntimeError, TypeError, NameError, IOError):
+                print 'file does not exist'
