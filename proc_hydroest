@@ -1,0 +1,60 @@
+###PROCESS LOCALLY DOWNLOADED FILES 
+###FOR NOAA HYDRO-ESTIMATOR PRODUCT
+##############################
+import datetime as dt
+import pytz
+import urllib2
+import struct
+import numpy as np
+import gzip
+import os
+##############################
+##SET DIRECTORY PATH AND DATA LATENCY
+lonlen = 8001 #from documentation
+latlen = 3111 #from documentation
+lonvec = np.loadtxt('/d2/dbroman/hydroestimator/dims/hydroest_lons.txt')
+latvec = np.loadtxt('/d2/dbroman/hydroestimator/dims/hydroest_lats.txt')
+rdext = '.gz'
+savdir = '/d2/dbroman/hydroestimator/india/'
+savdir_raw = '/d2/dbroman/hydroestimator/raw/'
+#INDIA SUBSET BOUNDS
+latbounds = [22 , 32]
+lonbounds = [73 , 98]
+latli = np.argmin(np.abs(latvec - latbounds[0]))
+latui = np.argmin(np.abs(latvec - latbounds[1]))
+lonli = np.argmin(np.abs(lonvec - lonbounds[0]))
+lonui = np.argmin(np.abs(lonvec - lonbounds[1]))
+##############################
+utc = pytz.utc
+d = dt.datetime(2015,6,10,23,0,0,0, utc) #set end time
+ds = dt.datetime(2015,1,1,0,0,0,0, utc) #set start time
+numhours = int((d-ds).total_seconds() / 60 / 60) + 2
+dlist = [d - dt.timedelta(hours = x) for x in range(0, numhours)]
+
+for i in range(0, numhours-1):
+    year = str(dlist[i].year)
+    month = str('%02d' % (int(dlist[i].month)))
+    day = str('%02d' % (int(dlist[i].day)))
+    doy = str('%02d' % int(dlist[i].strftime('%j')))
+    hour = str('%02d' % (int(dlist[i].hour)))
+    hoursav = str('%04d' % (int(hour) * 100))
+
+    binsav = savdir_raw + 'world1hr.' + year + doy + hour + rdext
+    binsubsav = savdir + 'hydroest_indiasub.' + year + month + day + '.' + hoursav + '.bi$
+    if os.path.isfile(binsubsav) is False:
+#OPEN FILE INTO NP ARRAY
+        try:
+            varin = gzip.open(binsav).read()
+            vartem = [int(i) for i in varin.split()]
+            var = np.array(vartem[2:]).reshape(latlen, lonlen).swapaxes(1,0)
+            var = (var - 2) * 0.30
+            var = np.flipud(var)
+            var = np.fliplr(var)
+            #SUBSET TO INDIA
+            varsub = var[lonli:lonui, latli:latui]
+
+            #SAVE SUBSET FILE
+            varsub.astype('int16').tofile(binsubsav)
+
+        except (RuntimeError, TypeError, NameError, IOError):
+            continue
