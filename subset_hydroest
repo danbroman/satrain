@@ -40,23 +40,15 @@ hour = str('%02d' % (int(d.hour)))
 hoursav = str('%04d' % (int(hour) * 100))
 rawsav = rddir + rdid + year + month + day + '.' + hoursav + savext
 subsav = savdir + savid + year + month + day + '.' + hoursav + savext
-
-    binsav = savdir_raw + 'world1hr.' + year + doy + hour + rdext
-
-    if os.path.isfile(binsubsav) is False:
-#OPEN FILE INTO NP ARRAY
-        try:
-            varin = gzip.open(binsav).read()
-            vartem = [int(i) for i in varin.split()]
-            var = np.array(vartem[2:]).reshape(latlen, lonlen).swapaxes(1,0)
-            var = (var - 2) * 0.30
-            var = np.flipud(var)
-            var = np.fliplr(var)
-            #SUBSET TO INDIA
-            varsub = var[lonli:lonui, latli:latui]
-
-            #SAVE SUBSET FILE
-            varsub.astype('int16').tofile(binsubsav)
-
+if os.path.isfile(binsubsav) is False:
+    try:
+        varin = gzip.open(rawsav).read() #open file into np array
+        vartem = [int(i) for i in varin.split()]
+        var = np.array(vartem[2:]).reshape(latlen, lonlen).swapaxes(1,0) #reshape raw data to lon, lat dims
+        var = (var - 2) * 0.30 #convert to mm (see documentation)
+        var = np.flipud(var) #flip array lat
+        var = np.fliplr(var) #flip array lon
+        varsub = var[lonli:lonui, latli:latui] #subset to india
+        varsub.astype('int16').tofile(binsubsav) #save subset to file
         except (RuntimeError, TypeError, NameError, IOError):
             continue
