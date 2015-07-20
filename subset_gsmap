@@ -22,13 +22,18 @@ lonbounds = [73 , 98] #lon subset bounds
 latbounds = [22 , 32] #lat subset bounds
 ##############################
 ##FIND SUBSET INDICES AND BUILD SUBSET FILE PATH
+d = dt.datetime.now(tz = pytz.utc) - dt.timedelta(hours = hlag) #date object of current time minus lag (timezone set to utc)
+year = str(d.year) #extracts year from date 
+month = str('%02d' % (int(d.month))) #extracts month from date with leading zero
+day = str('%02d' % (int(d.day))) #extracts day from date with leading zero
+hour = str('%04d' % (int(d.hour) * 100)) #extracts hour and formats to XX00 with leading zeros
 lonli = np.argmin(np.abs(lonvec - lonbounds[0]))
 lonui = np.argmin(np.abs(lonvec - lonbounds[1]))
 latli = np.argmin(np.abs(latvec - latbounds[0]))
 latui = np.argmin(np.abs(latvec - latbounds[1]))
 subsav = savdir +  + year + month + day + '.' + hour + savext
 ##############################
-##SUBSETS FILE
+##SUBSET FILE
 if os.path.isfile(binsubsav) is False:
     try:
         varin = gzip.open(binsav) #opens gzip file to memory
