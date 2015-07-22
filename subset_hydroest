@@ -52,6 +52,6 @@ if os.path.isfile(subsav) is False:
         var = np.flipud(var) #flip array lat
         var = np.fliplr(var) #flip array lon
         varsub = var[lonli:lonui, latli:latui] #subset to india
-        varsub.astype('int16').tofile(subsav) #save subset to file
+        varsub.astype(dattyp_sub).tofile(subsav) #save subset to file
         except (RuntimeError, TypeError, NameError, IOError):
             continue
