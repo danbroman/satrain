@@ -38,7 +38,7 @@ lonui = np.argmin(np.abs(lonvec - lonbounds[1]))
 latli = np.argmin(np.abs(latvec - latbounds[0]))
 latui = np.argmin(np.abs(latvec - latbounds[1]))
 rawsav = rawhead + rawid + year + month + day + '.' + hour + rawext
-subsav = subdir +  + year + month + day + '.' + hour + subext
+subsav = subhead +  + year + month + day + '.' + hour + subext
 ##############################
 ##SUBSET FILE
 if os.path.isfile(subsav) is False:
