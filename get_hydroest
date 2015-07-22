@@ -18,14 +18,6 @@ savid = 'world1hr.'
 savext = rdext #file extension in raw file ..set to same ext as url
 hlag = 2 #hour lag 
 ##############################
-##SUBSET VALS
-latbounds = [22 , 32] #india bounds
-lonbounds = [73 , 98] #india bounds
-latli = np.argmin(np.abs(latvec - latbounds[1])) #bounds switched because of ordering
-latui = np.argmin(np.abs(latvec - latbounds[0])) #bounds switched because of ordering
-lonli = np.argmin(np.abs(lonvec - lonbounds[1])) #bounds switched because of ordering
-lonui = np.argmin(np.abs(lonvec - lonbounds[0])) #bounds switched because of ordering
-##############################
 d = dt.datetime.now(tz = pytz.utc) - dt.timedelta(hours = hlag)
 year = str(d.year)
 month = str('%02d' % (int(d.month)))
@@ -37,7 +29,7 @@ url = rdhead + rdid + year + doy + hour + rdext
 rawsav = savdir + savid + year + month + day + '.' + hour + savext
 if os.path.isfile(rawsav) is False: #checks if raw file exists
         try:
-                urllib.urlretrieve(url, rawsav)
+            urllib.urlretrieve(url, rawsav)
         except (RuntimeError, TypeError, NameError, IOError):
-                pass
+            pass
         
